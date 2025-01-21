@@ -1,101 +1,204 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { useRef, useState } from "react";
+import { Slider } from "@/components/ui/slider";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import * as LucideIcons from "lucide-react";
+import Preview from "@/components/Preview";
+
+export default function WatermarkGenerator() {
+  const [size, setSize] = useState(48);
+  const [color, setColor] = useState("gray");
+  // const [opacity, setOpacity] = useState(0.5);
+  const [background, setBackground] = useState("white");
+  const [strokeWidth, setStrokeWidth] = useState(2);
+  const [spacing, setSpacing] = useState(44);
+  const [selectedIcon, setSelectedIcon] = useState("Aperture");
+  const [fileType, setFileType] = useState("svg");
+
+  const previewRef = useRef<HTMLDivElement>(null);
+
+  const handleDownload = (format: "svg" | "png") => {
+    const previewElement = previewRef.current;
+    if (!previewElement) {
+      console.error("Preview element not found.");
+      return;
+    }
+
+    const svgElement = previewElement.querySelector("svg");
+    if (!svgElement) {
+      console.error("SVG element not found inside preview.");
+      return;
+    }
+
+    if (format === "svg") {
+      // Serialize SVG and download
+      const svgData = new XMLSerializer().serializeToString(svgElement);
+      const svgBlob = new Blob([svgData], {
+        type: "image/svg+xml;charset=utf-8",
+      });
+      const url = URL.createObjectURL(svgBlob);
+
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "watermark.svg";
+      link.click();
+
+      URL.revokeObjectURL(url);
+    } else if (format === "png") {
+      // Convert SVG to PNG
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+
+      const svgData = new XMLSerializer().serializeToString(svgElement);
+      const svgBlob = new Blob([svgData], {
+        type: "image/svg+xml;charset=utf-8",
+      });
+      const svgUrl = URL.createObjectURL(svgBlob);
+
+      const img = new Image();
+      img.crossOrigin = "anonymous"; // Prevent CORS issues
+      img.onload = () => {
+        canvas.width = img.width;
+        canvas.height = img.height;
+        ctx?.drawImage(img, 0, 0);
+
+        const pngUrl = canvas.toDataURL("image/png");
+        const link = document.createElement("a");
+        link.href = pngUrl;
+        link.download = "watermark.png";
+        link.click();
+
+        URL.revokeObjectURL(svgUrl);
+      };
+
+      img.onerror = (error) => {
+        console.error("Error loading image for PNG conversion:", error);
+      };
+
+      img.src = svgUrl;
+    }
+  };
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+    <div className="container mx-auto p-6 sm:p-8 mt-10">
+      <div className="flex flex-col md:flex-row gap-6 md:gap-8">
+        <div
+          className="w-full md:w-1/2 aspect-video border rounded-xl"
+          ref={previewRef}
+        >
+          <Preview
+            iconName={selectedIcon}
+            size={size}
+            color={color}
+            // opacity={opacity}
+            strokeWidth={strokeWidth}
+            background={background}
+            spacing={spacing}
+          />
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+        <div className="w-full md:w-1/2 space-y-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Icon
+            </label>
+            <select
+              value={selectedIcon}
+              onChange={(e) => setSelectedIcon(e.target.value)}
+              className="w-full p-2 border rounded"
+            >
+              {Object.keys(LucideIcons).map((name) => (
+                <option key={name} value={name}>
+                  {name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="flex flex-col gap-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Background
+              </label>
+              <Input
+                type="color"
+                value={background}
+                onChange={(e) => setBackground(e.target.value)}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Color
+              </label>
+              <Input
+                type="color"
+                value={color}
+                onChange={(e) => setColor(e.target.value)}
+              />
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Size ({size})
+            </label>
+            <Slider
+              min={16}
+              max={48}
+              step={4}
+              value={[size]}
+              onValueChange={(value) => setSize(value[0])}
+            />
+          </div>
+          {/* <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Opacity ({opacity})
+            </label>
+            <Slider
+              min={0}
+              max={1}
+              step={0.1}
+              value={[opacity]}
+              onValueChange={(value) => setOpacity(value[0])}
+            />
+          </div> */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              StrokeWidth ({strokeWidth})
+            </label>
+            <Slider
+              min={0.5}
+              max={3}
+              step={0.25}
+              value={[strokeWidth]}
+              onValueChange={(value) => setStrokeWidth(value[0])}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Spacing ({spacing})
+            </label>
+            <Slider
+              min={0}
+              max={48}
+              step={4}
+              value={[spacing]}
+              onValueChange={(value) => setSpacing(value[0])}
+            />
+          </div>
+        </div>
+      </div>
+      <div className="w-full mt-6 flex">
+        <Button onClick={() => handleDownload(fileType)} className="w-full">
+          Download
+        </Button>
+        <select
+          onChange={(e) => setFileType(e.target.value)}
+          className="p-2 border rounded"
         >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+          <option value={"svg"}>svg</option>
+          <option value={"png"}>png</option>
+        </select>
+      </div>
     </div>
   );
 }
