@@ -10,12 +10,12 @@ import Preview from "@/components/Preview";
 export default function WatermarkGenerator() {
   const [size, setSize] = useState(48);
   const [color, setColor] = useState("gray");
-  // const [opacity, setOpacity] = useState(0.5);
+  const [opacity, setOpacity] = useState(0.5);
+  const [spacing, setSpacing] = useState(44);
   const [background, setBackground] = useState("white");
   const [strokeWidth, setStrokeWidth] = useState(2);
-  const [spacing, setSpacing] = useState(44);
-  const [selectedIcon, setSelectedIcon] = useState("Aperture");
-  const [fileType, setFileType] = useState("svg");
+  const [iconArr, setIconArr] = useState<string[]>(["Aperture"]);
+  // const [fileType, setFileType] = useState("svg");
 
   const previewRef = useRef<HTMLDivElement>(null);
 
@@ -33,7 +33,6 @@ export default function WatermarkGenerator() {
     }
 
     if (format === "svg") {
-      // Serialize SVG and download
       const svgData = new XMLSerializer().serializeToString(svgElement);
       const svgBlob = new Blob([svgData], {
         type: "image/svg+xml;charset=utf-8",
@@ -46,39 +45,56 @@ export default function WatermarkGenerator() {
       link.click();
 
       URL.revokeObjectURL(url);
-    } else if (format === "png") {
-      // Convert SVG to PNG
-      const canvas = document.createElement("canvas");
-      const ctx = canvas.getContext("2d");
-
-      const svgData = new XMLSerializer().serializeToString(svgElement);
-      const svgBlob = new Blob([svgData], {
-        type: "image/svg+xml;charset=utf-8",
-      });
-      const svgUrl = URL.createObjectURL(svgBlob);
-
-      const img = new Image();
-      img.crossOrigin = "anonymous"; // Prevent CORS issues
-      img.onload = () => {
-        canvas.width = img.width;
-        canvas.height = img.height;
-        ctx?.drawImage(img, 0, 0);
-
-        const pngUrl = canvas.toDataURL("image/png");
-        const link = document.createElement("a");
-        link.href = pngUrl;
-        link.download = "watermark.png";
-        link.click();
-
-        URL.revokeObjectURL(svgUrl);
-      };
-
-      img.onerror = (error) => {
-        console.error("Error loading image for PNG conversion:", error);
-      };
-
-      img.src = svgUrl;
     }
+    //  else if (format === "png") {
+    //   const canvas = document.createElement("canvas");
+    //   const ctx = canvas.getContext("2d");
+
+    //   const svgData = new XMLSerializer().serializeToString(svgElement);
+    //   const svgBlob = new Blob([svgData], {
+    //     type: "image/svg+xml;charset=utf-8",
+    //   });
+    //   const svgUrl = URL.createObjectURL(svgBlob);
+
+    //   const img = new Image();
+    //   img.crossOrigin = "anonymous";
+    //   img.onload = () => {
+    //     canvas.width = img.width;
+    //     canvas.height = img.height;
+    //     ctx?.drawImage(img, 0, 0);
+
+    //     const pngUrl = canvas.toDataURL("image/png");
+    //     const link = document.createElement("a");
+    //     link.href = pngUrl;
+    //     link.download = "watermark.png";
+    //     link.click();
+
+    //     URL.revokeObjectURL(svgUrl);
+    //   };
+
+    //   img.onerror = (error) => {
+    //     console.error("Error loading image for PNG conversion:", error);
+    //   };
+
+    //   img.src = svgUrl;
+    // }
+  };
+
+  const handleIconChange = (index: number, newValue: string) => {
+    const updatedIcons = [...iconArr];
+    updatedIcons[index] = newValue;
+    setIconArr(updatedIcons);
+  };
+
+  const addIcon = () => {
+    if (iconArr.length < 3) {
+      setIconArr([...iconArr, "Aperture"]); // Default new icon
+    }
+  };
+
+  const removeIcon = (index: number) => {
+    const updatedIcons = iconArr.filter((_, i) => i !== index);
+    setIconArr(updatedIcons);
   };
 
   return (
@@ -89,10 +105,10 @@ export default function WatermarkGenerator() {
           ref={previewRef}
         >
           <Preview
-            iconName={selectedIcon}
+            iconArr={iconArr}
             size={size}
             color={color}
-            // opacity={opacity}
+            opacity={opacity}
             strokeWidth={strokeWidth}
             background={background}
             spacing={spacing}
@@ -101,19 +117,36 @@ export default function WatermarkGenerator() {
         <div className="w-full md:w-1/2 space-y-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Icon
+              Icons (Up to 3)
             </label>
-            <select
-              value={selectedIcon}
-              onChange={(e) => setSelectedIcon(e.target.value)}
-              className="w-full p-2 border rounded"
-            >
-              {Object.keys(LucideIcons).map((name) => (
-                <option key={name} value={name}>
-                  {name}
-                </option>
-              ))}
-            </select>
+            {iconArr.map((icon, index) => (
+              <div key={index} className="flex items-center gap-4 mb-2">
+                <select
+                  value={icon}
+                  onChange={(e) => handleIconChange(index, e.target.value)}
+                  className="w-full p-2 border rounded"
+                >
+                  {Object.keys(LucideIcons).map((name) => (
+                    <option key={name} value={name}>
+                      {name}
+                    </option>
+                  ))}
+                </select>
+                {iconArr.length > 1 && (
+                  <Button
+                    variant="destructive"
+                    onClick={() => removeIcon(index)}
+                  >
+                    Remove
+                  </Button>
+                )}
+              </div>
+            ))}
+            {iconArr.length < 3 && (
+              <Button onClick={addIcon} className="mt-2">
+                Add Icon
+              </Button>
+            )}
           </div>
           <div className="flex flex-col gap-6">
             <div>
@@ -149,7 +182,7 @@ export default function WatermarkGenerator() {
               onValueChange={(value) => setSize(value[0])}
             />
           </div>
-          {/* <div>
+          <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Opacity ({opacity})
             </label>
@@ -160,7 +193,7 @@ export default function WatermarkGenerator() {
               value={[opacity]}
               onValueChange={(value) => setOpacity(value[0])}
             />
-          </div> */}
+          </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               StrokeWidth ({strokeWidth})
@@ -188,16 +221,16 @@ export default function WatermarkGenerator() {
         </div>
       </div>
       <div className="w-full mt-6 flex">
-        <Button onClick={() => handleDownload(fileType)} className="w-full">
-          Download
+        <Button onClick={() => handleDownload('svg')} className="w-full">
+          Download SVG
         </Button>
-        <select
+        {/* <select
           onChange={(e) => setFileType(e.target.value)}
           className="p-2 border rounded"
         >
           <option value={"svg"}>svg</option>
           <option value={"png"}>png</option>
-        </select>
+        </select> */}
       </div>
     </div>
   );
