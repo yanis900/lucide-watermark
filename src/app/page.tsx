@@ -119,7 +119,7 @@ export default function WatermarkGenerator() {
                   {iconArr.map((icon, index) => (
                     <div
                       key={index}
-                      className="flex items-center gap-2 bg-gray-100 p-2 rounded text-sm"
+                      className="flex items-center gap-2 p-2 rounded text-sm"
                     >
                       <span title={icon}>
                         {(LucideIcons as any)[icon] &&
@@ -127,8 +127,9 @@ export default function WatermarkGenerator() {
                       </span>
                       <Button
                         onClick={() => handleIconRemove(index)}
-                        variant={"destructive"}
+                        variant={"ghost"}
                         size={"icon"}
+                        className="text-red-500"
                       >
                         <LucideIcons.X size={16} />
                       </Button>
