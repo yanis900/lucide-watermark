@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { UserProvider } from "@auth0/nextjs-auth0/client";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -13,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Watermark Generator",
-  description: "Generate SVG watermarks using Lucide icons",
+  title: "LucideDesign",
+  description: "Icon Watermark Generator",
 };
 
 export default function RootLayout({
@@ -27,7 +28,9 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <main className="flex-grow">{children}</main>
+        <UserProvider>
+          <main className="flex-grow">{children}</main>
+        </UserProvider>
       </body>
     </html>
   );
