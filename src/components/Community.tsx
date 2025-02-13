@@ -168,7 +168,7 @@ export default function Community() {
                         alt="profile"
                       />
                       <span className="text-sm text-gray-600">
-                        {item.user.name}
+                        {item.user.name.length > 10 ? item.user.name.substring(0, 10) + "..." : item.user.name}
                       </span>
                     </div>
                     <span className="text-sm text-gray-400">
