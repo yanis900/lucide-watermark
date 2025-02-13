@@ -3,7 +3,7 @@ import { Item } from "@/models/items";
 
 export async function POST(request: Request) {
   try {
-    const { user, svgData } = await request.json();
+    const { user, svgData, pngData } = await request.json();
 
     const filteredUser = {
       picture: user.picture,
@@ -11,7 +11,7 @@ export async function POST(request: Request) {
       sid: user.sid,
     };
 
-    if (!user || !svgData) {
+    if (!user || !svgData || !pngData) {
       return new Response(
         JSON.stringify({ error: "Missing required fields" }),
         {
@@ -22,7 +22,7 @@ export async function POST(request: Request) {
     }
 
     await connectDB();
-    await Item.create({ user: filteredUser, svgData });
+    await Item.create({ user: filteredUser, svgData, pngData });
 
     return new Response(JSON.stringify({ message: "Item Created" }), {
       status: 201,

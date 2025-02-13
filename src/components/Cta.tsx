@@ -9,7 +9,7 @@ export default function Cta() {
           <span className="block">Start Creating Watermarks today.</span>
         </h2>
         <p className="mt-4 text-lg leading-6 text-white">
-          Improve your design, lorem ipsum, and take your projects
+          Improve your design and take your projects
           to the next level with <span className="underline">LucideDesign</span>.
         </p>
         <Button size="lg" className="mt-8 w-full sm:w-auto" variant="secondary">

@@ -1,8 +1,22 @@
 "use client";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { GalleryVerticalEnd, Heart, Paintbrush } from "lucide-react";
+import {
+  GalleryVerticalEnd,
+  Heart,
+  LogOut,
+  Paintbrush,
+  User,
+} from "lucide-react";
 import { useUser } from "@auth0/nextjs-auth0/client";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu";
+import { Avatar } from "./ui/avatar";
 
 export default function Header() {
   const { user, isLoading } = useUser();
@@ -25,41 +39,40 @@ export default function Header() {
                 <Button variant="outline" className="ml-8 whitespace-nowrap">
                   <a href="/api/auth/login">Sign in</a>
                 </Button>
-                <Button className="ml-8 whitespace-nowrap">
-                  <a href="/api/auth/login">Sign up</a>
-                </Button>
               </>
             )}
             {user && (
-              <div className="flex items-center gap-4">
-                {/* <Link href={"/my-designs"}>
-                  <Button
-                    size={"icon"}
-                    variant={"ghost"}
-                    className="flex items-center justify-center"
-                  >
-                    <Paintbrush size={36} />
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size={'icon'} className="p-0 rounded-full">
+                    <Avatar className="w-12 h-12">
+                      <img
+                        src={user.picture || '/images/placeholder.svg'}
+                        alt="Profile"
+                        className="rounded-full"
+                      />
+                    </Avatar>
                   </Button>
-                </Link>
-                <Link href="/favourites">
-                  <Button
-                    size={"icon"}
-                    variant={"ghost"}
-                    className="flex items-center justify-center"
-                  >
-                    <Heart size={36} />
-                  </Button>
-                </Link> */}
-                <Link href={"/api/auth/logout"}>
-                  <img
-                    src={user.picture ?? ""}
-                    alt="Profile"
-                    className="rounded-full"
-                    width="36"
-                    height="36"
-                  />
-                </Link>
-              </div>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuLabel>{user.name}</DropdownMenuLabel>
+                  <DropdownMenuItem asChild>
+                    <Link href="/profile" className="flex items-center gap-2">
+                      <User size={16} />
+                      Profile
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link
+                      href="/api/auth/logout"
+                      className="flex items-center gap-2 text-red-600"
+                    >
+                      <LogOut size={16} />
+                      Log out
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             )}
           </div>
         </div>

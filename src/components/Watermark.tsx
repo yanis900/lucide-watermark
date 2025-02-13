@@ -8,8 +8,8 @@ import Preview from "@/components/Preview";
 import * as LucideIcons from "lucide-react";
 import { useUser } from "@auth0/nextjs-auth0/client";
 import Link from "next/link";
-import { download } from "@/lib/download";
 import { fetchItems } from "@/handlers/fetch";
+import { convertSvgToPng } from "@/lib/utils";
 
 export default function Watermark() {
   const [size, setSize] = useState(48);
@@ -38,18 +38,21 @@ export default function Watermark() {
 
     const svgData = new XMLSerializer().serializeToString(svgElement);
 
+    const pngData = await convertSvgToPng(svgData, size, size);
+
     // download(svgData);
 
+    console.log(pngData)
     try {
       const response = await fetch("/api/createItem", {
         method: "POST",
-        body: JSON.stringify({ user, svgData }),
+        body: JSON.stringify({ user, svgData, pngData }),
         headers: { "Content-Type": "application/json" },
       });
 
       if (response.ok) {
         console.log("ok");
-        fetchItems()
+        await fetchItems();
       }
     } catch (error) {
       console.error(error);

@@ -17,6 +17,12 @@ const itemSchema = new Schema({
     type: String,
     required: true,
   },
+  pngData: {
+    type: String,
+    required: true,
+  },
+  likedBy: [{ type: String }],
 });
 
-export const Item = mongoose.models.Item || mongoose.model("Item", itemSchema, "items");
+export const Item =
+  mongoose.models.Item || mongoose.model("Item", itemSchema, "items");
