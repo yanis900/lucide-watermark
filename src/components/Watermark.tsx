@@ -52,7 +52,7 @@ export default function Watermark() {
 
       if (response.ok) {
         console.log("ok");
-        await fetchItems();
+        const data = await fetchItems();
       }
     } catch (error) {
       console.error(error);
